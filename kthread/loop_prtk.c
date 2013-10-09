@@ -2,6 +2,7 @@
 //内核线程循环打印,试验 
 //为了测试内核进程编写
 //cuipeng's
+#include "../printk_module/prtk_module.h"
 #include <linux/kthread.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -11,6 +12,7 @@
 #include <asm/signal.h>
 
 struct task_struct *loop_printk_fun = NULL;
+extern int my_printk(void);
 
 static int loop_printk(void *data)
 {
@@ -25,6 +27,7 @@ static int loop_printk(void *data)
     {
         if(kthread_should_stop()) break;
         printk("\n%s",ch);
+        my_printk();
 
         set_current_state(TASK_INTERRUPTIBLE);
                 //TASK_UNINTERRUPTIBLE 不可以中断，TASK_INTERRUPTIBLE 可以
