@@ -1,4 +1,4 @@
-//内核线程循环打印 
+//内核线程循环打印,试验 
 #include <linux/kthread.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
