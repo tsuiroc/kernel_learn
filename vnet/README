@@ -1,0 +1,8 @@
+welcome to read this code.
+
+this code is written by me to learn linux vitual net driver base on kernel 2.6.32-279.el6.i686 on centos.  git remote add origin git@github.com:tsuiroc/linux_net_driver.git
+
+vitual net driver is magic tool to use linux net driver,you can learn datapath in linux.
+
+as you know it's a lot of diff api between diff kernel.I release this code with 2.6.32 which need ndo_start_xmit is diff with other's code in internet.
+
