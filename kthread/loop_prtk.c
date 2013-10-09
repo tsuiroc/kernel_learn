@@ -1,5 +1,6 @@
 //内核线程循环打印,试验 
-
+//为了测试内核进程编写
+//cuipeng's
 #include <linux/kthread.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
