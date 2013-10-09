@@ -1,3 +1,4 @@
+//为了测试内核进程编写
 #include <linux/kthread.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
