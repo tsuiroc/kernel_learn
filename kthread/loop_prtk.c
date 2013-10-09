@@ -6,11 +6,7 @@
 
 #include <asm/signal.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("崔氏小农");
-
 struct task_struct *loop_printk_fun = NULL;
-
 
 static int loop_printk(void *data)
 {
@@ -56,3 +52,6 @@ static void __exit exit_kthread(void)
 
 module_init(init_kthread);
 module_exit(exit_kthread);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("崔氏小农");
