@@ -4,6 +4,7 @@
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
+#include <linux/device.h>
 
 #include <asm/uaccess.h>
 
@@ -15,6 +16,8 @@ static int dev_minor = 0;
 static int dev_nums = 1;
 module_param(dev_nums, int, 0);
 
+static struct class *cui_class;
+
 typedef struct _cui_dev_s {
     int id;
     char name[10];
@@ -24,7 +27,6 @@ typedef struct _cui_dev_s {
 cui_dev_t *pcui_devs;
 
 static char *pdata = NULL;
-
 
 int cuipeng_open(struct inode *inode, struct file *filp)
 {
@@ -47,7 +49,7 @@ ssize_t cuipeng_read(struct file *filp, char __user *buff, size_t size, loff_t *
 size_t cuipeng_write(struct file *filp, void *buff, size_t size, loff_t *offp)
 {
 
-    copy_from_user((void *)pdata, buff, 10);
+    copy_from_user(pdata, buff, 10);
     printk("dump %s\n",pdata);
 
     return 0;
@@ -101,14 +103,14 @@ static int __init cuipeng_init(void)
         return ret;
     }
 
-    pcui_devs = kmalloc(dev_nums * sizeof(cui_dev_t), GFP_KERNEL);
+    pcui_devs = (cui_dev_t *)kmalloc(dev_nums * sizeof(cui_dev_t), GFP_KERNEL);
     if(!pcui_devs)
     {
         printk("alloc mem error"); 
         return ret;
     }
 
-    pdata = kmalloc(10 * sizeof(char), GFP_KERNEL);
+    pdata = (char *)kmalloc(10 * sizeof(char), GFP_KERNEL);
     if(!pdata)
     {
         printk("alloc mem error"); 
@@ -125,18 +127,30 @@ static int __init cuipeng_init(void)
         cui_drv_setup_cdev(cui, cui->id);
     }
 
+    cui_class = class_create(THIS_MODULE, DEV_NAME);
+    
+    device_create(cui_class, NULL, dev, NULL, "%s", DEV_NAME);
     return 0;
 
 }
 
 static void __exit cuipeng_exit(void)
 {
+    if(!pcui_devs)
     kfree(pcui_devs );
+
     int devno = MKDEV(dev_major, dev_minor);
+
     unregister_chrdev_region( devno, dev_nums); 
+    device_destroy(cui_class, devno);
+    class_destroy(cui_class);
+
     printk("\nmodule exit");
     return;
 }
 
 module_init(cuipeng_init);
 module_exit(cuipeng_exit);
+
+MODULE_LICENSE("GPL");
+
