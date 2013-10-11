@@ -5,6 +5,8 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
+#include <linux/netdevice.h>
+#include <linux/etherdevice.h>
 
 #include <asm/uaccess.h>
 
@@ -18,6 +20,8 @@ module_param(dev_nums, int, 0);
 
 static struct class *cui_class;
 
+static void cui_eth_init(struct net_device *dev);
+
 typedef struct _cui_dev_s {
     int id;
     char name[10];
@@ -27,6 +31,29 @@ typedef struct _cui_dev_s {
 cui_dev_t *pcui_devs;
 
 static char *pdata = NULL;
+
+struct net_device *eth_dev;
+
+static int ethcui_open(struct net_device *d)
+{
+    printk("open ethcui\n");
+}
+
+static int ethcui_stop(struct net_device *d)
+{
+    printk("stop ethcui\n");
+}
+
+static const struct net_device_ops cui_eth_ops = {
+    .ndo_open = ethcui_open,
+    .ndo_stop = ethcui_stop,
+};
+
+static void cui_eth_init(struct net_device *dev)
+{
+    ether_setup( dev);
+    dev->netdev_ops=&cui_eth_ops;
+}
 
 int cuipeng_open(struct inode *inode, struct file *filp)
 {
@@ -127,6 +154,10 @@ static int __init cuipeng_init(void)
         cui_drv_setup_cdev(cui, cui->id);
     }
 
+    eth_dev = alloc_netdev( 0, "eth.cui", cui_eth_init);
+
+    register_netdev(eth_dev);
+
     cui_class = class_create(THIS_MODULE, DEV_NAME);
     
     device_create(cui_class, NULL, dev, NULL, "%s", DEV_NAME);
@@ -144,6 +175,12 @@ static void __exit cuipeng_exit(void)
     unregister_chrdev_region( devno, dev_nums); 
     device_destroy(cui_class, devno);
     class_destroy(cui_class);
+
+    if(eth_dev)
+    {
+        unregister_netdev(eth_dev);
+        free_netdev(eth_dev);
+    }
 
     printk("\nmodule exit");
     return;
